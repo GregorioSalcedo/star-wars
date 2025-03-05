@@ -1,0 +1,127 @@
+---
+title: "Code-Through: Data Wrangling with dplyr and the Star Wars Dataset"
+author: "Gregorio Salcedo"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_document:
+    df_print: paged
+    theme: cerulean
+    highlight: haddock
+    toc: true
+    toc_float: true
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# Load necessary packages
+library(dplyr)
+library(ggplot2)
+library(gganimate)
+```
+
+## Introduction
+This tutorial will demonstrate how to use `dplyr` for data wrangling using the `starwars` dataset from the `dplyr` package.
+
+```{r load-data}
+# Load the Star Wars dataset
+starwars <- dplyr::starwars
+# View the first few rows
+head(starwars)
+```
+
+## Selecting Columns
+We can use `select()` to choose specific columns from the dataset.
+
+```{r select-columns}
+starwars_selected <- starwars %>% 
+  select(name, height, mass, species)
+
+head(starwars_selected)
+```
+
+## Filtering Rows
+Use `filter()` to extract characters meeting specific conditions.
+
+```{r filter-data}
+# Characters taller than 200cm
+starwars_tall <- starwars %>% 
+  filter(height > 200)
+
+starwars_tall
+```
+
+## Arranging Data
+We can sort data with `arrange()`.
+
+```{r arrange-data}
+# Arrange characters by mass in descending order
+starwars_sorted <- starwars %>% 
+  arrange(desc(mass))
+
+head(starwars_sorted)
+```
+
+## Mutating (Adding New Columns)
+Create new columns using `mutate()`.
+
+```{r mutate-data}
+# Add a BMI column
+starwars <- starwars %>% 
+  mutate(BMI = mass / ((height / 100) ^ 2))
+
+select(starwars, name, mass, height, BMI)
+```
+
+## Summarizing Data
+Use `summarize()` to compute summary statistics.
+
+```{r summarize-data}
+# Average height of characters
+starwars_summary <- starwars %>% 
+  summarise(average_height = mean(height, na.rm = TRUE))
+
+starwars_summary
+```
+
+## Grouping Data
+We can analyze data by groups using `group_by()`.
+
+```{r group-by}
+# Average height by species
+starwars_grouped <- starwars %>% 
+  group_by(species) %>% 
+  summarise(avg_height = mean(height, na.rm = TRUE)) %>%
+  arrange(desc(avg_height))
+
+head(starwars_grouped)
+```
+
+## Visualization: Plot of Height vs. Mass
+Let's create a scatter plot showing the relationship between height and mass.
+
+```{r plot-height-mass}
+# Scatter plot of height vs. mass
+plot <- ggplot(starwars, aes(x = height, y = mass, color = species)) +
+  geom_point(alpha = 0.7) +
+  labs(title = "Height vs. Mass of Star Wars Characters", x = "Height (cm)", y = "Mass (kg)") +
+  theme_minimal()
+
+plot
+```
+
+## Animated Plot: Character Growth
+We'll create an animated plot to show how characters are distributed by height over time.
+
+```{r animate-height, warning=FALSE}
+# Animation showing height distribution by species
+animated_plot <- ggplot(starwars, aes(x = height, fill = species)) +
+  geom_histogram(binwidth = 10, alpha = 0.7, position = "identity") +
+  labs(title = "Distribution of Star Wars Character Heights", x = "Height (cm)", y = "Count") +
+  theme_minimal() +
+  transition_states(species, transition_length = 2, state_length = 1)
+
+animated_plot
+```
+
+
+## Conclusion
+This tutorial demonstrated how to use `dplyr` to manipulate data efficiently. The `starwars` dataset is great for practicing filtering, selecting, and summarizing data. Happy coding!
